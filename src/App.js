@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./style/App.css";
 
-let visibilityBtnMore = "None image";
+let visibilityBtnMore;
 
 function App() {
   const [images, setImage] = useState([]);
@@ -77,6 +77,8 @@ function App() {
     visibilityBtnMore = <button onClick={handleMoreBtn} className="button">
       MORE
     </button>
+  } else {
+    visibilityBtnMore = "None image";
   }
 
   return (
