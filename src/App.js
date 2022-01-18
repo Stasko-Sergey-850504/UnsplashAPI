@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./style/App.css";
 
@@ -73,10 +73,12 @@ function App() {
     setPage(page + 1);
   };
 
-  if(images.length >= 10) {
-    visibilityBtnMore = <button onClick={handleMoreBtn} className="button">
-      MORE
-    </button>
+  if (images.length >= 10) {
+    visibilityBtnMore = (
+      <button onClick={handleMoreBtn} className="button">
+        MORE
+      </button>
+    );
   } else {
     visibilityBtnMore = "None image";
   }
@@ -117,13 +119,11 @@ function App() {
 
       <div className="wrapper-image">
         {images.map((image) => (
-          <img src={image.urls.thumb} alt="" className="img-icon"/>
+          <img src={image.urls.thumb} alt="" className="img-icon" />
         ))}
       </div>
 
-      <div className="searching-container">
-        {visibilityBtnMore}
-      </div>
+      <div className="searching-container">{visibilityBtnMore}</div>
     </div>
   );
 }
