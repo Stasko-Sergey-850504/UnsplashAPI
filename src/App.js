@@ -1,33 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./style/App.css";
-
-let visibilityBtnMore;
 
 function App() {
   const [images, setImage] = useState([]);
   const [query, setQuery] = useState("");
-  const [queries, setQueries] = useState([
-    {
-      createdTime: new Date().toLocaleString(),
-      value: "",
-    },
-  ]);
+  const [queries, setQueries] = useState([]);
   const [page, setPage] = useState(0);
   const [suggestion, setSuggestion] = useState(false);
 
   useEffect(() => {
+    localStorage.setItem("QUERY-HISTORY", JSON.stringify([]));
     setQueries([...JSON.parse(localStorage.getItem("QUERY-HISTORY"))]);
   }, []);
 
   useEffect(() => {
-    if (images.length >= 10) {
-      visibilityBtnMore = true;
-    }
     fetchImages();
-    localStorage.clear();
+    localStorage.removeItem("QUERY-HISTORY");
     localStorage.setItem("QUERY-HISTORY", JSON.stringify(queries));
-  }, [queries, page]);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queries,page]);
 
   const dropDown = () => {
     let dropList = [];
@@ -36,13 +28,13 @@ function App() {
     for (let i = 1; i < length; i++) {
       dropList.push(queries[queries.length - i]);
     }
+
     return dropList;
   };
 
   const fetchImages = () => {
     const apiRoot = "https://api.unsplash.com";
     const clientID = process.env.REACT_APP_ACCESSKEY;
-    //${clientID}
     const url = `${apiRoot}/search/photos?page=${page}&query=${query}&client_id=${clientID}`;
 
     axios.get(url).then((res) => {
@@ -73,21 +65,11 @@ function App() {
     setPage(page + 1);
   };
 
-  if (images.length >= 10) {
-    visibilityBtnMore = (
-      <button onClick={handleMoreBtn} className="button">
-        MORE
-      </button>
-    );
-  } else {
-    visibilityBtnMore = "None image";
-  }
-
   return (
     <div className="App">
       <div className="searching-container">
         <input
-          onClick={() => setSuggestion(true)}
+          onClick={() => setSuggestion(true)} // onFocus
           onChange={(event) => setQuery(event.target.value)}
           value={query}
           type="text"
@@ -100,9 +82,13 @@ function App() {
         {
           <ul>
             {dropDown().map((item) => {
+              let dropItem = "";
               if (item.value !== "" && suggestion === true) {
-                return (
+                dropItem = (
                   <li
+                    // @MISTAKE: Each child in a list should have a unique "key" prop.
+                    //+++
+                    key={item.value}
                     onClick={() => {
                       handleClickSugesstionList(item);
                     }}
@@ -112,6 +98,7 @@ function App() {
                   </li>
                 );
               }
+              return dropItem;
             })}
           </ul>
         }
@@ -119,11 +106,25 @@ function App() {
 
       <div className="wrapper-image">
         {images.map((image) => (
-          <img src={image.urls.thumb} alt="" className="img-icon" />
+
+          <img
+            src={image.urls.thumb}
+            key={image.id}
+            alt=""
+            className="img-icon"
+          />
         ))}
       </div>
 
-      <div className="searching-container">{visibilityBtnMore}</div>
+      <div className="searching-container">
+        {images.length >= 10 ? (
+          <button onClick={handleMoreBtn} className="button">
+            More
+          </button>
+        ) : (
+          "None image"
+        )}
+      </div>
     </div>
   );
 }
